@@ -1,0 +1,30 @@
+#!/bin/bash
+set -e
+. ~/hpcjob/runFunctions.sh
+
+#-------------------------------------
+stage[1]="simpleFoam"
+stage[2]="pimpleFoam"
+stage[3]="pimpleBeamDynFoam"
+
+savefiles[1]=""
+savefiles[2]=""
+savefiles[3]="BeamDynState_last.dat shape.dat surfaceDisplacementVectors.dat Tip_Disp_IEC.out Mid_Disp_IEC.out position.out load.out"
+
+dryrun=true
+#-------------------------------------
+
+job_init
+
+job_runstage 1
+mkdir -p stage1/1000 # say the solver finished after 1000 steps
+
+startFrom0=true # let's start stage2 at t=0
+job_runstage 2
+mkdir -p stage2/0.2 # say the solver finished at t=0.2
+
+# solver will restart from 0.2
+startFrom0=false
+job_runstage 3
+
+
