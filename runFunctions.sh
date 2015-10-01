@@ -206,3 +206,44 @@ job_post()
     fi
 }
 
+job_genBDinput()
+{
+    mkdir -p initBD
+    cp CLEAN_START/driver.input initBD/
+    Fstr=`(
+        grep -A 2 "sum of forces" $app.out | grep pressure | tail -n 1 | sed 's/[()]//g'
+        grep -A 2 "sum of forces" $app.out | grep viscous  | tail -n 1 | sed 's/[()]//g'
+        ) | awk '{ Fx+=$3; Fy+=$4; Fz+=$5 } END {print Fx, Fy, Fz}'`
+    Mstr=`(
+        grep -A 2 "sum of moments" $app.out | grep pressure | tail -n 1 | sed 's/[()]//g'
+        grep -A 2 "sum of moments" $app.out | grep viscous  | tail -n 1 | sed 's/[()]//g'
+        ) | awk '{ Mx+=$3; My+=$4; Mz+=$5 } END {print Mx, My, Mz}'`
+    Fx=`echo $Fstr | awk '{print $3}'` # convert from OpenFOAM to IEC coordinates here
+    Fy=`echo $Fstr | awk '{print $1}'`
+    Fz=`echo $Fstr | awk '{print $2}'`
+    Mx=`echo $Mstr | awk '{print $3}'`
+    My=`echo $Mstr | awk '{print $1}'`
+    Mz=`echo $Mstr | awk '{print $2}'`
+    sed -i "s/CONSTFX/$Fx/g" initBD/driver.input
+    sed -i "s/CONSTFY/$Fy/g" initBD/driver.input
+    sed -i "s/CONSTFZ/$Fz/g" initBD/driver.input
+    sed -i "s/CONSTMX/$Mx/g" initBD/driver.input
+    sed -i "s/CONSTMY/$My/g" initBD/driver.input
+    sed -i "s/CONSTMZ/$Mz/g" initBD/driver.input
+}
+
+job_setBDoutput()
+{
+    if [ -f "initBD/BeamDynState.dat" ]; then
+        latest=`foamLatestTime.py stage$((currstage-1))`
+        if [ "$nprocs" -gt 1 ]; then
+            cp initBD/BeamDynState.dat stage$((currstage-1))/processor0/$latest/
+        else
+            cp initBD/BeamDynState.dat stage$((currstage-1))/$latest/
+        fi
+    else
+        jecho "WARNING No saved BeamDyn state found in initBD"
+        exit
+    fi
+}
+
