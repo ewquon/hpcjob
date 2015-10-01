@@ -20,7 +20,7 @@ job_init()
     jecho '-----------------------------------------------'
     if [ -f "current_stage" ]; then
         export currstage=`cat current_stage`
-        jecho "Continuing from stage $currstage"
+        jecho "Starting from stage $currstage"
     else
         jecho "Starting new job"
         export currstage=1
@@ -29,8 +29,10 @@ job_init()
 
     if [ -n "$PBS_NODEFILE" ]; then
         export nprocs=`cat $PBS_NODEFILE | wc -l`
+        jecho "Running in parallel with $nprocs processors"
     else
         export nprocs=1
+        jecho "Running in serial mode"
     fi
 }
 
@@ -57,6 +59,11 @@ job_setup()
         if [ "$nprocs" -gt 1 ]; then #parallel
             jecho "Decomposing mesh and transferring fields"
             jexec decomposePar -ifRequired &> decomposePar.out
+            if [ "$dryrun" == true ]; then 
+                for i in `seq 0 $((nprocs-1))`; do
+                    mkdir -p processor$i
+                done
+            fi
         fi
 
     else # restart
@@ -66,7 +73,6 @@ job_setup()
             jecho "Previous stage $prevstage not found!"
         else
             jecho "Restarting from $prevdir"
-            echo "startFrom0 = $startFrom0"
 
             if [ "$nprocs" -gt 1 ]; then #parallel restart
                 latest=`foamLatestTime.py $prevdir/processor0`
@@ -87,7 +93,7 @@ job_setup()
                         cp -rv $prevdir/processor$i/$latest processor$i/
                     done
                 fi 
-                jecho "Latest time from processor0 is $latest"
+                #jecho "Latest time from processor0 is $latest"
 
             else #serial restart
                 latest=`foamLatestTime.py $prevdir`
@@ -160,17 +166,17 @@ job_post()
 
         cp -rv system $savedir/
         for f in $app*.out*; do mv -v $f $savedir/; done
-        for f in "`foamOutputDirs.py`"; do mv -v $f $savedir/; done
+        for f in `foamOutputDirs.py`; do mv -v $f $savedir/; done
         if [ -d "postProcessing" ]; then mv -v postProcessing $savedir/; fi
         for f in ${savefiles[currstage]}; do
-            if [ -f "$f" ]; then cp -frv $f $savedir/; fi
+            if [ -f "$f" ]; then cp -rv $f $savedir/; fi
         done
 
         if [ "$nprocs" -gt 1 ]; then #parallel
             jecho "Saving processor directories for stage $currstage"
             for i in `seq 0 $((nprocs-1))`; do
                 mkdir -p $savedir/processor$i
-                mv -v processor$i/*[0-9]* $savedir/processor$i/
+                for f in `foamOutputDirs.py processor$i`; do mv processor$i/$f $savedir/processor$i/; done
                 for f in ${savefiles[currstage]}; do
                     if [ -f "processor$i/$f" ]; then cp -rv processor$i/$f $savedir/processor$i/; fi
                 done

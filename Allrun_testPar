@@ -15,13 +15,20 @@ dryrun=true
 #-------------------------------------
 
 job_init
+echo "nprocs = $nprocs"
 
 job_runstage 1
-mkdir -p stage1/1000 # say the solver finished after 1000 steps
+#mkdir -p stage1/1000 # say the solver finished after 1000 steps
+for i in `seq 0 $((nprocs-1))`; do
+    mkdir -p stage1/processor$i/1000
+done
 
 startFrom0=true # let's start stage2 at t=0
 job_runstage 2
-mkdir -p stage2/0.2 # say the solver finished at t=0.2
+#mkdir -p stage2/0.2 # say the solver finished at t=0.2
+for i in `seq 0 $((nprocs-1))`; do
+    mkdir -p stage2/processor$i/0.2
+done
 
 # solver will restart from 0.2
 startFrom0=false
