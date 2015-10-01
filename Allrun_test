@@ -7,9 +7,9 @@ stage[1]="simpleFoam"
 stage[2]="pimpleFoam"
 stage[3]="pimpleBeamDynFoam"
 
-savefiles[1]=""
-savefiles[2]=""
-savefiles[3]="BeamDynState_last.dat shape.dat surfaceDisplacementVectors.dat Tip_Disp_IEC.out Mid_Disp_IEC.out position.out load.out"
+saveFiles[1]=""
+saveFiles[2]=""
+saveFiles[3]="BeamDynState_last.dat shape.dat surfaceDisplacementVectors.dat Tip_Disp_IEC.out Mid_Disp_IEC.out position.out load.out"
 
 dryrun=true
 #-------------------------------------

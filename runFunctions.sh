@@ -40,6 +40,9 @@ job_setup()
 {
     jecho "Copying default settings files"
     cp -v config/default/* system/
+    if [ -f "system/decomposeParDict" ]; then
+        sed -i "s/NPROCS/$nprocs/g" system/decomposeParDict
+    fi
 
     solver=${stage[$currstage]}
     jecho "Copying $solver settings files"
@@ -58,7 +61,7 @@ job_setup()
         cp -rv CLEAN_START/0 .
         if [ "$nprocs" -gt 1 ]; then #parallel
             jecho "Decomposing mesh and transferring fields"
-            jexec decomposePar -ifRequired &> decomposePar.out
+            jexec decomposePar -ifRequired -latestTime &> decomposePar.out
             if [ "$dryrun" == true ]; then 
                 for i in `seq 0 $((nprocs-1))`; do
                     mkdir -p processor$i
@@ -71,6 +74,7 @@ job_setup()
         prevdir="stage$prevstage"
         if [ ! -d "$prevdir" ]; then
             jecho "Previous stage $prevstage not found!"
+            exit
         else
             jecho "Restarting from $prevdir"
 
@@ -168,7 +172,7 @@ job_post()
         for f in $app*.out*; do mv -v $f $savedir/; done
         for f in `foamOutputDirs.py`; do mv -v $f $savedir/; done
         if [ -d "postProcessing" ]; then mv -v postProcessing $savedir/; fi
-        for f in ${savefiles[currstage]}; do
+        for f in ${saveFiles[currstage]}; do
             if [ -f "$f" ]; then cp -rv $f $savedir/; fi
         done
 
@@ -177,13 +181,24 @@ job_post()
             for i in `seq 0 $((nprocs-1))`; do
                 mkdir -p $savedir/processor$i
                 for f in `foamOutputDirs.py processor$i`; do mv processor$i/$f $savedir/processor$i/; done
-                for f in ${savefiles[currstage]}; do
+                for f in ${saveFiles[currstage]}; do
                     if [ -f "processor$i/$f" ]; then cp -rv processor$i/$f $savedir/processor$i/; fi
                 done
             done
         fi
 
         currstage=$((currstage+1))
+
+        latest=`foamLatestTime.py $savedir`
+        rstAdd=false
+        for f in ${rstAddFiles[currstage]}; do
+            rstAdd=true
+            cp -rv CLEAN_START/$f $savedir/$latest/
+        done
+        if [[ "$rstAdd" = true && "$nprocs" -gt 1 ]]; then #parallel
+            jecho "Remapping fields for added restart files"
+            jexec decomposePar -ifRequired -latestTime &> $savedir/decomposePar_rstAdd.out
+        fi
         
     else
         jecho "WARNING Job crashed???"
