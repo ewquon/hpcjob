@@ -3,13 +3,21 @@ set -e
 . ~/hpcjob/runFunctions.sh
 
 #-------------------------------------
+# solvers (corresponding to directories in config/*)
 stage[1]="simpleFoam"
 stage[2]="pimpleFoam"
 stage[3]="pimpleBeamDynFoam"
 
-savefiles[1]=""
-savefiles[2]=""
-savefiles[3]="BeamDynState_last.dat shape.dat surfaceDisplacementVectors.dat Tip_Disp_IEC.out Mid_Disp_IEC.out position.out load.out"
+# optional files to save after each stage
+saveFiles[1]=""
+saveFiles[2]=""
+saveFiles[3]="BeamDynState_last.dat shape.dat surfaceDisplacementVectors.dat Tip_Disp_IEC.out Mid_Disp_IEC.out position.out load.out"
+
+# optional files to add to timestep directories prior to restart
+rstAddFiles[2]=""
+rstAddFiles[3]="pointDisplacement"
+
+BeamDynDriver=~/BeamDyn/BeamDyn_glin64
 
 #dryrun=true
 #-------------------------------------
@@ -20,6 +28,10 @@ job_runstage 1
 
 startFrom0=true
 job_runstage 2
+
+job_genBDinput
+( cd initBD && $BeamDynDriver driver.input )
+job_setBDoutput
 
 startFrom0=false
 job_runstage 3
