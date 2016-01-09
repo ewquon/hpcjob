@@ -1,0 +1,12 @@
+#!/bin/bash
+
+if [ -n "$1" ]; then
+    current=`find $* -name 'RUNNING'`
+else
+    current=`find . -name 'RUNNING'`
+fi
+
+for f in $current; do
+    d=`dirname $f`
+    (cd $d && echo "$d @ `t`")
+done
