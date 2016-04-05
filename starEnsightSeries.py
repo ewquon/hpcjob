@@ -29,7 +29,7 @@ for fname in glob.glob('*.case'):
                     varname = line[3]
                     vartype = line[0]
                     solntypes[varname] = vartype
-        print 'Solution variables:',solntypes
+        print 'Solution variables in casefiles:',solntypes
         first = False
 
     idx = int(name.split('@')[1])
@@ -52,7 +52,7 @@ for fname in glob.glob('*.case'):
 
 indices.sort()
 delta = indices[1]-indices[0]
-print 'time index range: [',indices[0],indices[-1],']  delta=',delta
+print 'Time index range: [',indices[0],indices[-1],']  delta=',delta
 
 filestr = """FORMAT
 type: ensight gold
@@ -76,14 +76,17 @@ time values:
 #scalar per element: VolumeFractionWater {prefix}@*****00000.VolumeFractionWater
 #vector per element: Velocity {prefix}@*****00000.Velocity
 varstrs = ''
+sys.stdout.write('Variables written out:')
 for v in solnvars:
     #varstrs += 'scalar per element: ' + v + ' soln@*****00000.{}\n'.format(v)
     varstrs += '{vartype} per element: {varname} soln@*****00000.{varname}\n'.format(vartype=solntypes[v],varname=v)
+    sys.stdout.write(' {:s}'.format(v))
+sys.stdout.write('\n')
     
 
 with open(outfile,'w') as f:
     f.write(filestr.format(prefix=prefix, varstrs=varstrs, 
         nsteps=N, start=indices[0], 
         delta=delta, timeValues=tvals))
-print 'wrote',outfile
+print '*** Wrote',outfile,'***'
 
