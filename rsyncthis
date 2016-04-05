@@ -1,0 +1,31 @@
+#!/bin/bash
+#baseAddr='equon@peregrine'
+baseAddr="$USER@peregrine.hpc.nrel.gov"
+
+if [ -f '.remotePath' ]; then
+    curdir=`cat .remotePath`
+    echo "Using alternate remote path: $curdir"
+else
+    altRemotePath=`upsearch .remotePath`
+    if [ -n "$altRemotePath" ]; then
+        echo "Found $altRemotePath"
+        curdir=`cat "$altRemotePath"`
+        echo "Alternate path (remote): $curdir"
+        altRemotePath=`dirname "$altRemotePath"`
+        len=${#altRemotePath}
+        relpath=${PWD:len}
+        echo "Relative path (local): ...$relpath"
+        curdir="${curdir}${relpath}"
+        echo "Using alternate remote path: $curdir"
+    else
+        curdir="scr/`this`"
+    fi
+fi
+
+if [ -n "$1" ]; then
+    for files in "$@"; do
+        cmd="rsync -aPv $baseAddr:$curdir/$files ."
+        echo $cmd
+        eval $cmd
+    done
+fi
