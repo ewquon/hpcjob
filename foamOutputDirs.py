@@ -15,7 +15,7 @@ numlist = []
 for d in dirs:
     try: 
         step = float(d)
-	numlist.append(step)
+        numlist.append(step)
         dirlist.append(d)
     except ValueError: pass
 
