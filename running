@@ -19,16 +19,23 @@ qstat -u equon | while read line; do
     #echo $i $line
     if [ "$i" -gt 5 ]; then
         id=`echo $line | awk '{print $1}'`
+        stat=`qstat -f $id | grep 'job_state' | awk '{print $NF}'`
+
         jobtime=`qstat -f $id | grep 'resources_used.walltime' | awk '{print $NF}'`
         #str=`qstat -f $id | grep 'PBS_O_WORKDIR'`
         str=`qstat -f $id | grep 'PWD'`
         str=${str##*PWD=}
         str=${str%%,*}
         shortpath=${str#/scratch/equon/}
-        curtime=`(cd $str && t)`
-        #tstr=`echo $curtime | awk '{printf "Time step %d, t= %f\n",$2,$4}'`
-        tstr=`echo $curtime | awk '{printf "t= %f s\n",$4}'`
-        echo "Job $id ($shortpath) running for $jobtime @ $tstr"
+
+        if [ ! "$stat" == "R" ]; then
+            echo "Job $id ($shortpath) state: $stat"
+        else
+            curtime=`(cd $str && t 2>/dev/null)`
+            #tstr=`echo $curtime | awk '{printf "Time step %d, t= %f\n",$2,$4}'`
+            tstr=`echo $curtime | awk '{printf "t= %f s\n",$NF}'`
+            echo "Job $id ($shortpath) running for $jobtime @ $tstr"
+        fi
     fi
 done
 

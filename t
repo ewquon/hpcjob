@@ -1,12 +1,42 @@
 #!/bin/bash
-curdir=`pwd`
-casename=`basename $curdir`
-if [ -f "$1" ]; then
-    fname="$1"
-elif [ -f "log.$casename" ]; then
-    fname="log.$casename"
+starsim=(*.sim)
+if [ -d "constant" -a -d "system" ]; then
+    #
+    # OpenFOAM
+    #
+    if [ -f "$1" ]; then
+        fname="$1"
+    else
+        fname=`ls -rt log.*.* | tail -n 1`
+    fi
+
+    str=`grep 'Time =' $fname | grep -v 'Exec' | tail -n 1`
+    latestTime=`echo $str | awk '{print $3}'`
+    latestStep=`echo $str | awk '{print $NF}'`
+
+#elif [ -f "${starsim[0]}" ]; then
+elif ls *.sim &> /dev/null; then
+    #
+    # Star-CCM+
+    #
+    curdir=`pwd`
+    casename=`basename $curdir`
+    if [ -f "$1" ]; then
+        fname="$1"
+    elif [ -f "log.$casename" ]; then
+        fname="log.$casename"
+    fi
+
+    str=`grep 'TimeStep' $fname | tail -n 1`
+    latestTime=`echo $str | awk '{print $NF}'`
+    latestStep=`echo $str | awk '{print $2}'`
+    latestStep=${latestStep%:}
+
 else
-    fname=`ls -rt log.* | tail -n 1`
-    echo $fname
+    echo "No log file found; please specify"
+    exit
 fi
-grep TimeStep $fname | tail -n 1
+
+echo "Found $fname" >&2
+echo "Time step $latestStep : t= $latestTime"
+
