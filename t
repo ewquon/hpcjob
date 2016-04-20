@@ -10,7 +10,7 @@ if [ -d "constant" -a -d "system" ]; then
         fname=`ls -rt log.*.* | tail -n 1`
     fi
 
-    str=`grep 'Time =' $fname | tail -n 1`
+    str=`grep 'Time =' $fname | grep -v 'Exec' | tail -n 1`
     latestTime=`echo $str | awk '{print $3}'`
     latestStep=`echo $str | awk '{print $NF}'`
 
@@ -37,5 +37,6 @@ else
     exit
 fi
 
+echo "Found $fname" >&2
 echo "Time step $latestStep : t= $latestTime"
 
