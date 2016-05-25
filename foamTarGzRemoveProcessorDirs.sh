@@ -1,7 +1,12 @@
 #!/bin/bash
 set -e
 
-iproc=0
+if [ -n "$1" ]; then 
+    iproc=$1
+else
+    iproc=0
+fi
+
 while true; do 
     d="processor$iproc"
     if [ ! -d "$d" ]; then

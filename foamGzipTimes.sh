@@ -1,2 +1,2 @@
 #!/bin/bash
-foamOutputDirs.py | xargs gzip -r -v
+foamOutputDirs_after0.py | xargs gzip -r -v
