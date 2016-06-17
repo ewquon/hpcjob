@@ -35,9 +35,7 @@ qstat -u equon | while read line; do
         #displaypath=${str#/scratch/equon/}
         displaypath=${str}
 
-        if [ ! "$stat" == "R" ]; then
-            echo "Job $id ($displaypath) state: $stat"
-        else
+        if [ "$stat" == "R" -o "$stat" == "C" ]; then
             filestr=`(cd $str && t 2>&1 | grep -e "Star" -e "FOAM")`
             curtime=`(cd $str && t 2>/dev/null)`
             if [[ $filestr == *"FOAM"* ]]; then
@@ -47,9 +45,14 @@ qstat -u equon | while read line; do
             else
                 solverstr='????'
             fi
-            #tstr=`echo $curtime | awk '{printf "Time step %d, t= %f\n",$2,$4}'`
             tstr=`echo $curtime | awk '{printf "t= %f s\n",$NF}'`
-            echo "Job $id ($displaypath) $solverstr running for $jobtime @ $tstr"
+            if [ "$stat" == "R" ]; then
+                echo "Job $id ($displaypath) $solverstr running for $jobtime @ $tstr"
+            elif [ "$stat" == "C" ]; then
+                echo "Job $id ($displaypath) $solverstr finished @ $tstr"
+            fi
+        else
+            echo "Job $id ($displaypath) state: $stat"
         fi
     fi
 done
