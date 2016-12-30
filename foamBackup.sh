@@ -13,10 +13,9 @@ basepath="/mss/projects"
 tmpdir='TO_SYNC_WITH_MSS'
 tarcmd='tar -cf' # --ignore-failed-read'
 
+echo "Backup path: $basepath"
+
 curdir=`pwd`
-
-mkdir -p "$tmpdir"
-
 if [ -f "$pathfile" ]; then
     tgtdir=`cat "$pathfile"`
     echo "Using alternate backup path: $tgtdir"
@@ -29,7 +28,7 @@ else
         altRemotePath=`dirname "$altRemotePath"`
         len=${#altRemotePath}
         relpath=${PWD:len}
-        echo "Relative path (local): ...$relpath"
+        echo "Relative path (local): (...)$relpath"
         tgtdir="${tgtdir}${relpath}"
         echo "Alternate path: $tgtdir"
     else
@@ -41,6 +40,8 @@ if [ -z "$1" ]; then
     echo "Specify directory(ies) to backup"
     exit
 fi
+
+mkdir -p "$tmpdir"
 
 runcmd()
 {
