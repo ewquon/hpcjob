@@ -52,6 +52,7 @@ for timedir in "$@"; do
         echo "SKIPPING existing $tgtdir/$timedir.tar"
         continue
     fi
+    mkdir -p $tgtdir
 
     runcmd $tarcmd $tgtdir/$timedir.tar $timedir
 
