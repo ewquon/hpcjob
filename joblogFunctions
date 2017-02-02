@@ -13,13 +13,18 @@ latest()
     curdateInt=`date +%s`
     trange=$((72*3600)) # 3 days
 	count=50
-	if [ -n "$1" ]; then count=$1; fi
+    printAll=false
+	if [ -n "$1" ]; then
+        count=$1
+        printAll=true
+    fi
 	tail -n $count $HOME/joblog | while read line
 	do
         rundate=${line#*started at }
         rundateInt=`date -d "$rundate" +%s`
         tdelta=$((curdateInt-rundateInt))
-        if [[ "$tdelta" -le "$trange" ]]; then
+        #if [[ "$tdelta" -le "$trange" ]]; then
+        if [ "$printAll" = true ] || [[ "$tdelta" -le "$trange" ]]; then
             echo "[$count] $line"
         fi
         count=$((count-1))
