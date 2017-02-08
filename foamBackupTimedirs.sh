@@ -36,7 +36,7 @@ else
     fi
 fi
 if [ -z "$1" ]; then
-    echo "Specify directory(ies) to backup"
+    echo "Specify time directory(ies) to backup"
     exit
 fi
 
