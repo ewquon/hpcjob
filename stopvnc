@@ -1,0 +1,17 @@
+#!/bin/bash
+
+cmd=`ps -ef | grep "$USER" | grep 'Xvnc' | grep -v 'grep' | head -n 1`
+for word in ${cmd#*Xvnc}; do
+    display=$word
+    break
+done
+if [ -n "$display" ]; then
+    echo "$display"
+    read -p "Kill vncserver$display? " -n 1 -r
+    echo # mvoe to newline
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        /opt/TurboVNC/bin/vncserver -kill $display
+    fi
+else
+    echo "no vncserver running for $USER"
+fi

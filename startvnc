@@ -1,0 +1,34 @@
+#!/bin/bash
+#VNC_CMD=/opt/TurboVNC/bin/vncserver
+VNC_CMD='/opt/TurboVNC/bin/vncserver -geometry 1680x1050'
+#VNC_CMD='/opt/TurboVNC/bin/vncserver -geometry 1152x720' # to fit 13" macbook screen
+
+#server=`hostname -f`
+server='dav1.hpc.nrel.gov'
+port=5900
+
+#if [ ! "`hostname`" == 'hpc-dav1.hpc.nrel.gov' ]; then
+if [ ! "`hostname`" == 'hpc-dav' ]; then
+    echo 'ssh dav.hpc.nrel.gov first!'
+    exit
+else
+    while read line; do
+        if [ -n "$line" ]; then
+            if [[ $line == *"desktop is"* ]]; then
+                i=${line##*:}
+                port=$((port+i))
+                echo $port
+            fi
+            echo "[vncserver] $line"
+        fi
+    done <<< "`$VNC_CMD 2>&1`"
+
+    #alias pf='vglrun paraview'
+    echo ''
+    echo 'To start paraview:'
+    echo '  source $HOME/paraviewEnvironment.sh'
+    echo '  vglrun paraview'
+    echo ''
+    echo 'To use TurboVNC, connect to:'
+    echo "  $server:$port"
+fi
