@@ -1,20 +1,11 @@
 #!/bin/bash
-
-#if [ -n "$1" ]; then
-#    current=`find $* -name 'RUNNING'`
-#else
-#    current=`find . -name 'RUNNING'`
-#fi
 #
-#echo "`date`:"
-#for f in $current; do
-#    d=`dirname $f`
-#    (cd $d && echo "$d @ `t`")
-#done
+# Scrapes PBS qstat output
+#
 
 i=0
 echo "`date`:"
-qstat -u equon | while read line; do
+qstat -u $USER | while read line; do
     i=$((i+1))
     #echo $i $line
     if [ "$i" -gt 5 ]; then
@@ -22,7 +13,6 @@ qstat -u equon | while read line; do
         stat=`qstat -f $id | grep 'job_state' | awk '{print $NF}'`
 
         jobtime=`qstat -f $id | grep 'resources_used.walltime' | awk '{print $NF}'`
-        #str=`qstat -f $id | grep 'PBS_O_WORKDIR'`
         str=`qstat -f $id | grep 'PWD'`
         n=0
         while [[ $str != *","* ]]; do
@@ -32,7 +22,6 @@ qstat -u equon | while read line; do
         done
         str=${str##*PWD=}
         str=${str%%,*}
-        #displaypath=${str#/scratch/equon/}
         displaypath=${str}
 
         if [ "$stat" == "R" -o "$stat" == "C" ]; then
