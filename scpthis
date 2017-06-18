@@ -1,6 +1,4 @@
 #!/bin/bash
-#baseAddr='equon@peregrine'
-baseAddr="$USER@peregrine.hpc.nrel.gov"
 
 str=''
 n=0
@@ -14,44 +12,26 @@ for val in $*; do
 done
 str="${str}"
 
-if [ -f '.remotePath' ]; then
-    curdir=`cat .remotePath`
-    echo "Using alternate remote path: $curdir"
-else
-    altRemotePath=`upsearch .remotePath`
-    if [ -n "$altRemotePath" ]; then
-        echo "Found $altRemotePath"
-        curdir=`cat "$altRemotePath"`
-        echo "Alternate path (remote): $curdir"
-        altRemotePath=`dirname "$altRemotePath"`
-        len=${#altRemotePath}
-        relpath=${PWD:len}
-        echo "Relative path (local): ...$relpath"
-        curdir="${curdir}${relpath}"
-        echo "Using alternate remote path: $curdir"
-    else
-        curdir="scr/`this`"
-    fi
-fi
+curdir=`getRemotePath`
 
 if [ $n -gt 0 ]; then
 
-    if [[ $1 == $baseAddr* ]]; then #copy from local to remote
+    if [[ $1 == $defaultBaseAddr* ]]; then #copy from local to remote
 
-        cmd="scp -r `pwd` $baseAddr:$curdir"
+        cmd="scp -r `pwd` $curdir"
 
     else #copy from remote to local
 
         if [ $n -gt 1 ]; then
-            #echo "scp -r $baseAddr:$curdir/{$str} ."
-            #scp -r $baseAddr:$curdir/{$str} .
-            cmd="scp -r $baseAddr:$curdir/{$str} ."
-            #cmd="rsync -aPv $baseAddr:$curdir/{$str} ."
+            #echo "scp -r $defaultBaseAddr:$curdir/{$str} ."
+            #scp -r $defaultBaseAddr:$curdir/{$str} .
+            cmd="scp -r $curdir/{$str} ."
+            #cmd="rsync -aPv $curdir/{$str} ."
         else
-            #echo "scp -r $baseAddr:$curdir/$str ."
-            #scp -r $baseAddr:$curdir/$str .
-            cmd="scp -r $baseAddr:$curdir/$str ."
-            #cmd="rsync -aPv $baseAddr:$curdir/$str ."
+            #echo "scp -r $defaultBaseAddr:$curdir/$str ."
+            #scp -r $defaultBaseAddr:$curdir/$str .
+            cmd="scp -r $curdir/$str ."
+            #cmd="rsync -aPv $curdir/$str ."
         fi
 
     fi

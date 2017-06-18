@@ -1,0 +1,29 @@
+#!/bin/bash
+#baseAddr='equon@peregrine'
+defaultBaseAddr="$USER@peregrine.hpc.nrel.gov"
+
+if [ -f '.remotePath' ]; then
+    curdir=`cat .remotePath`
+    echo "Using alternate remote path: $curdir" &>2
+else
+    altRemotePath=`upsearch .remotePath`
+    if [ -n "$altRemotePath" ]; then
+        echo "Found $altRemotePath" &>2
+        curdir=`cat "$altRemotePath"`
+        echo "Alternate path (remote): $curdir" &>2
+        altRemotePath=`dirname "$altRemotePath"`
+        len=${#altRemotePath}
+        relpath=${PWD:len}
+        echo "Relative path (local): ...$relpath" &>2
+        curdir="${curdir}${relpath}"
+        echo "Using alternate remote path: $curdir" &>2
+    else
+        curdir="scr/`this`"
+    fi
+fi
+
+if [[ ! $curdir == *:* ]]; then
+    curdir="$defaultBaseAddr:$curdir"
+fi
+
+echo $curdir
