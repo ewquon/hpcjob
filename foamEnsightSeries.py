@@ -14,16 +14,16 @@ prefixSolnStr  = '_U.*****.U'
 prefixNewFile  = '_U.{:05d}.U'
 
 if len(sys.argv) > 1:
-    postdir = sys.argv[1]
+    postdir = sys.argv[1].rstrip(os.sep)
 else:
     sys.exit('Specify array postprocessing directory with structure: arraySampleDir/timeDir/*.case')
+if not os.path.isdir(postdir):
+    sys.exit('Not a valid directory: '+postdir)
+
 meshFile = postdir + prefixMeshFile
 solnFile = postdir + prefixSolnFile
 solnStr  = postdir + prefixSolnStr
 newFile  = postdir + prefixNewFile
-
-if not os.path.isdir(postdir):
-    sys.exit('Not a valid directory: '+postdir)
 
 outdir = postdir + '_series'
 if os.path.isdir(outdir):
