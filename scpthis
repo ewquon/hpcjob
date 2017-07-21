@@ -16,11 +16,11 @@ curdir=`getRemotePath`
 
 if [ $n -gt 0 ]; then
 
-    if [[ $1 == $defaultBaseAddr* ]]; then #copy from local to remote
-
-        cmd="scp -r `pwd` $curdir"
-
-    else #copy from remote to local
+#    if [[ $1 == $defaultBaseAddr* ]]; then #copy from local to remote
+#
+#        cmd="scp -r `pwd` $curdir"
+#
+#    else #copy from remote to local
 
         if [ $n -gt 1 ]; then
             #echo "scp -r $defaultBaseAddr:$curdir/{$str} ."
@@ -34,7 +34,7 @@ if [ $n -gt 0 ]; then
             #cmd="rsync -aPv $curdir/$str ."
         fi
 
-    fi
+#    fi
 
     echo $cmd
     eval $cmd
