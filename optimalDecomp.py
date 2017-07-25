@@ -33,8 +33,22 @@ def optimal_decomp(N,Lx,Ly,Lz):
 #===========================================================
 if __name__ == "__main__":
     import sys
-    N = int(sys.argv[1])
-    Lx = int(sys.argv[2])
-    Ly = int(sys.argv[3])
-    Lz = int(sys.argv[4])
-    print optimal_decomp(N,Lx,Ly,Lz)
+    if len(sys.argv) <= 1:
+        sys.exit('USAGE: '+sys.argv[0]+' Nx Ny Nz [N]')
+    Nx = int(sys.argv[1])
+    Ny = int(sys.argv[2])
+    Nz = int(sys.argv[3])
+    if len(sys.argv) > 4:
+        N = int(sys.argv[4])
+        print optimal_decomp(N,Nx,Ny,Nz)
+    else:
+        ppn = 24
+        Ncells = Nx*Ny*Nz
+        for cells_per_proc in np.arange(3,10)*1e4:
+            Nnodes = int((Ncells / cells_per_proc) / ppn)
+            N = Nnodes * ppn
+           #print 'nnodes, ppn =',Nnodes,ppn
+           #print 'nprocs =',N
+           #print 'procs/node =',Ncells/N
+            print N,'Nnodes=',Nnodes,' partions:',optimal_decomp(N,Nx,Ny,Nz),' procs/node =',Ncells/N
+
