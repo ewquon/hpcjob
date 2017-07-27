@@ -1,29 +1,40 @@
 #!/bin/bash
 
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+NC='\033[0m' # No Color
+
 check()
 {
-    logfile="$1"
-    shift
-    if [ -f "$logfile" ]; then
-        donestr="$*"
-        if [ -z "$*" ]; then donestr='End'; fi
-        found=`grep "$donestr" $logfile`
-        if [ "$?" == 0 ]; then
-            echo "$logfile... $found"
+    donestr=''
+    for arg in "$@"; do
+        if [ -z "$donestr" ]; then
+            donestr="$arg"
+        elif [ ! -f "$arg" ]; then
+            echo "Current directory does not have $arg"
         else
-            echo "*** Problem with $logfile: $* not found ***"
+            logfile="$arg"
+            found=`grep "$donestr" $logfile`
+            if [ "$?" == 0 ]; then
+                echo -e "${GREEN}$logfile${NC}: $found"
+            else
+                echo -e "${RED}$logfile${NC}: '$donestr' not found ***"
+            fi
         fi
-    else
-        echo "Current directory does not have $logfile"
-    fi
+    done
 }
 
-check log.*blockMesh*
-check log.*renumberMesh*
-check log.*checkMesh* 'Mesh OK'
-check log.*changeDictionary*
-check log.*decomposePar*
-check log.*setFieldsABL* 'Finalising'
+check 'End' log.*blockMesh*
+check 'Mesh size' log.*renumberMesh*
+check 'End' log.*renumberMesh*
+check 'End' log.*topoSet*
+check 'Refined' log.*refineHexMesh*
+check 'End' log.*refineHexMesh*
+check 'Mesh OK' log.*checkMesh*
+check 'End' log.*changeDictionary*
+check 'Max number of cells' log.*decomposePar*
+check 'End' log.*decomposePar*
+check 'Finalising' log.*setFieldsABL*
 
 t
 
