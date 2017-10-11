@@ -34,7 +34,7 @@ def optimal_decomp(N,Lx,Ly,Lz):
 if __name__ == "__main__":
     import sys
     if len(sys.argv) <= 1:
-        sys.exit('USAGE: '+sys.argv[0]+' Nx Ny Nz [N]')
+        sys.exit('USAGE: '+sys.argv[0]+' Nx Ny Nz [Ncores]')
     Nx = int(sys.argv[1])
     Ny = int(sys.argv[2])
     Nz = int(sys.argv[3])
