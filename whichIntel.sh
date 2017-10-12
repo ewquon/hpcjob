@@ -13,7 +13,7 @@ case $procname in
 'E5-2695 v2')
     echo 'ivybridge'
     ;;
-'ES-2670 v3')
+'E5-2670 v3')
     echo 'haswell'
     ;;
 *)
