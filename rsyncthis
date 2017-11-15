@@ -1,10 +1,15 @@
 #!/bin/bash
+#
+# Example:
+# Download files with a specific name from multiple (time) directories, starting within simulationDir/postProcessing/sliceDataInstantaneous:
+#   rsync -aPvhz --include '*/' --include 'U_slice_horizontal_z080.vtk' --exclude '*' equon@peregrine.hpc.nrel.gov:/remote/simulationDir/postProcessing/sliceDataInstantaneous/*0 .
+#
 
 curdir=`getRemotePath`
 
 if [ -n "$1" ]; then
     for files in "$@"; do
-        cmd="rsync -aPvh $curdir/$files ."
+        cmd="rsync -aPvhz $curdir/$files ."
         echo $cmd
         eval $cmd
     done
