@@ -1,0 +1,33 @@
+#!/usr/bin/env python
+#
+# Returns list of files properly sorted by numeric subdirectory name
+# (e.g., time output directories from OpenFOAM)
+#
+import sys
+import os
+
+if len(sys.argv) <= 1:
+    sys.exit('Sample usage: '+sys.argv[0]+' someDir/*/*someFiles*')
+
+paths = []
+sortValues = []
+
+# assume path names are consistent
+testpath = sys.argv[1]
+idx = -1
+for i, sub in enumerate(testpath.split(os.sep)):
+    try:
+        float(sub)
+        idx = i
+        sys.stderr.write('Sorted listing by level {:d} (e.g.: {:s} in {:s})'.format(idx,sub,testpath))
+    except: pass
+
+# go through listings
+for f in sys.argv[1:]:
+    paths.append(f)
+    sortValues.append(float(f.split(os.sep)[idx]))
+
+# sort and print
+sortOrder = [ x[0] for x in sorted(enumerate(sortValues), key=lambda x: x[1]) ]
+for i in sortOrder:
+    print paths[i]

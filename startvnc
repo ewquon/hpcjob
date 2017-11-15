@@ -4,12 +4,13 @@ VNC_CMD='/opt/TurboVNC/bin/vncserver -geometry 1680x1050'
 #VNC_CMD='/opt/TurboVNC/bin/vncserver -geometry 1152x720' # to fit 13" macbook screen
 
 #server=`hostname -f`
-server='dav1.hpc.nrel.gov'
+#server='dav1.hpc.nrel.gov'
+server='hpc-dav2.hpc.nrel.gov'
 port=5900
 
 #if [ ! "`hostname`" == 'hpc-dav1.hpc.nrel.gov' ]; then
-if [ ! "`hostname`" == 'hpc-dav' ]; then
-    echo 'ssh dav.hpc.nrel.gov first!'
+if [ ! "`hostname -f`" == "$server" ]; then
+    echo "ssh $server first!"
     exit
 else
     while read line; do
