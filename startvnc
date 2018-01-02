@@ -1,6 +1,7 @@
 #!/bin/bash
 #VNC_CMD=/opt/TurboVNC/bin/vncserver
-VNC_CMD='/opt/TurboVNC/bin/vncserver -geometry 1680x1050'
+#VNC_CMD='/opt/TurboVNC/bin/vncserver -geometry 1680x1050'
+VNC_CMD='/opt/TurboVNC/bin/vncserver -geometry 1440x900'
 #VNC_CMD='/opt/TurboVNC/bin/vncserver -geometry 1152x720' # to fit 13" macbook screen
 
 #server=`hostname -f`
@@ -31,5 +32,5 @@ else
     echo '  vglrun paraview'
     echo ''
     echo 'To use TurboVNC, connect to:'
-    echo "  $server:$port"
+    echo "  ${server#hpc-}:$port"
 fi
