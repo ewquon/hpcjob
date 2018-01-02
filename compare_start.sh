@@ -10,7 +10,6 @@ fi
 
 diff -qr $1 $2 | grep -v \
     -e 'processor' \
-    -e 'runscript.preprocess.' \
     -e 'log.' \
     -e 'constant/polyMesh' \
     -e 'postProcessing' \
