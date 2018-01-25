@@ -61,8 +61,8 @@ $RSYNC \
         setUp \
         runscript.* \
         log.* \
-        processor*/$latesttime \
         $timedirs \
-    $target/ 2>/dev/null
-$RSYNC ${postProcessing_files} $target/postProcessing/ 2>/dev/null
+    $target/
+$RSYNC -m --include='processor**/' --include="**/$latesttime/**" --exclude='*' ./  $target/
+$RSYNC ${postProcessing_files} $target/postProcessing/
 
