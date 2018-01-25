@@ -8,6 +8,7 @@ def timestring(timestamp):
     return datetime.datetime.fromtimestamp(timestamp).strftime('%Y-%m-%d')
 
 for dpath in sys.argv[1:]:
+    if not os.path.isdir(dpath): continue
     fullpaths = []
     timestamps = []
     for fpath in os.listdir(dpath):
