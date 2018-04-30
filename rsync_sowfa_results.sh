@@ -63,6 +63,6 @@ $RSYNC \
         log.* \
         $timedirs \
     $target/
-$RSYNC -m --include='processor**/' --include="**/$latesttime/**" --exclude='*' ./  $target/
+$RSYNC -m --include='processor**/' --include="**/constant/**" --include="**/$latesttime/**" --exclude='*' ./  $target/
 $RSYNC ${postProcessing_files} $target/postProcessing/
 
