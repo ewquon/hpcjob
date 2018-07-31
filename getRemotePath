@@ -18,7 +18,7 @@ else
         curdir="${curdir}${relpath}"
         echo "Using alternate remote path: $curdir" >&2
     else
-        curdir="scr/`this`"
+        curdir="/scratch/$USER/`this`"
     fi
 fi
 
