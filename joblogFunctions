@@ -1,8 +1,10 @@
+joblog="$HOME/pbsjobs.log"
+
 go() 
 {
 	jerb=1
 	if [ -n "$1" ]; then jerb=$1; fi
-	latest=`tail -n $jerb $HOME/joblog | head -n 1`
+	latest=`tail -n $jerb $joblog | head -n 1`
 	echo "cd $latest"
 	jobdir=`echo $latest | awk '{print $1}'`
 	cd $jobdir
@@ -19,7 +21,7 @@ latest()
         printN=true
     fi
     toggle=false
-	tail -n $count $HOME/joblog | while read line
+	tail -n $count $joblog | while read line
 	do
         rundate=${line#*started at }
         rundateInt=`date -d "$rundate" +%s`
