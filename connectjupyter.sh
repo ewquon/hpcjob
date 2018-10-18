@@ -35,8 +35,14 @@ get_address()
             port=${port%/?*}
             if [ "$port" == "$1" ]; then
                 localport=$((port+1000))
-                echo "Mapping $localport to $addr ($path)"
-                ssh -L $localport:$remoteaddr:$port -f -N peregrine.hpc.nrel.gov 2>/dev/null
+                cmd="ssh -L $localport:$remoteaddr:$port -f -N peregrine.hpc.nrel.gov"
+                running=`ps -e | grep "$cmd" | grep -v 'grep'`
+                if [ -z "$running" ]; then
+                    echo "Mapping $localport to $addr ($path)"
+                    $cmd 2>/dev/null
+                else
+                    echo "Tunnel from localhost:$localport to $addr already exists"
+                fi
                 if [ "$?" == 0 ]; then
                     connected=true
                     localaddr=`echo $addr | sed "s/$port/$localport/"`
@@ -51,5 +57,5 @@ get_address()
     fi
 }
 
-ssh $remoteaddr 'jupyter notebook list' 2>/dev/null | get_address $1
+ssh $remoteaddr 'module load conda && jupyter notebook list' 2>/dev/null | get_address $1
 
