@@ -28,11 +28,11 @@ get_address()
         if [ -z "$1" ]; then
             echo $line
         elif [[ $line == http://localhost* ]]; then
-            # example line: http://localhost:8888/?token=blerg :: /path/to/server
+            # example line to parse: http://localhost:8888/?token=blerg :: /path/to/server
             addr=${line%% ::*}
             path=${line##*:: }
             port=${addr#http://localhost:}
-            port=${port%/?*}
+            port=${port%/\?*}
             if [ "$port" == "$1" ]; then
                 localport=$((port+1000))
                 cmd="ssh -L $localport:$remoteaddr:$port -f -N peregrine.hpc.nrel.gov"
