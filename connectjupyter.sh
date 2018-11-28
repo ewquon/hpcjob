@@ -37,19 +37,29 @@ get_address()
         if [ -z "$1" ]; then
             echo $line
         elif [[ $line == http://localhost* ]]; then
-            # example line to parse: http://localhost:8888/?token=blerg :: /path/to/server
-            addr=${line%% ::*}
-            path=${line##*:: }
-            port=${addr#http://localhost:}
+            #
+            # get remote address, remote path (for reference), and remote port
+            # - example line to parse: http://localhost:8888/?token=blerg :: /path/to/server
+            #
+            addr=${line%% ::*}  # http://localhost:8888/?token=blerg
+            path=${line##*:: }  # /path/to/server
+            port=${addr#http://localhost:}  # 8888
             if [[ $port == *token=* ]]; then
                 # have token (instead of notebook password)
                 token=${port#*/?token=}
             fi
             port=${port%/*} # remote port
+            #
+            # check if the remote port is the one we want
+            #
             if [ "$port" == "$1" ]; then
-                #cmd="ssh -L $localport:$remoteaddr:$port -f -N $domain"
+                # the tunnel command looks like:
+                #   ssh -L $localport:$remoteaddr:$port -f -N $domain
                 #running=`ps -e | grep "$cmd" | grep -v 'grep'`
-                running=`ps -e | grep 'ssh -L' | grep -e $domain -e $port`
+                #running=`ps -e | grep 'ssh -L' | grep -e $domain -e $port`
+                running=`ps -e | grep 'ssh -L' | grep $domain`
+                running=${running#*ssh -L } # ignore pid, etc
+                running=`echo $running | grep $port`
                 if [ -z "$running" ]; then
                     # create tunnel
                     localport=$((port+1000))
