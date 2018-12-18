@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 #
-# create symbolic links for specified directories to form a single .case file with the complete time series
+# Create symbolic links for specified directories to form a single Ensight .case
+# file with the complete time series
 #
+from __future__ import print_function
 import sys
 import os
 import glob
@@ -20,14 +22,18 @@ else:
 if not os.path.isdir(postdir):
     sys.exit('Not a valid directory: '+postdir)
 
-meshFile = postdir + prefixMeshFile
-solnFile = postdir + prefixSolnFile
-solnStr  = postdir + prefixSolnStr
-newFile  = postdir + prefixNewFile
+if len(sys.argv) > 2:
+    prefix = sys.argv[2]
+else:
+    prefix = os.path.split(postdir)[1]
+meshFile = prefix + prefixMeshFile
+solnFile = prefix + prefixSolnFile
+solnStr  = prefix + prefixSolnStr
+newFile  = prefix + prefixNewFile
 
 outdir = postdir + '_series'
 if os.path.isdir(outdir):
-    print 'Warning: time series directory',outdir,'already exists'
+    print('Warning: time series directory',outdir,'already exists')
 else:
     os.makedirs(outdir)
 
@@ -48,13 +54,13 @@ timeArray = np.array(timeList)
 timeSortOrder = np.argsort(timeArray)
 timeArray = timeArray[timeSortOrder]
 tdirList = [ tdirList[i] for i in timeSortOrder ]
-for t,tdir in zip(timeArray,tdirList):
-    print 't=',t,':',tdir
+#for t,tdir in zip(timeArray,tdirList):
+#    print('t=',t,':',tdir)
 Ntimes = len(tdirList)
 
 timeDiff = np.diff(timeArray)
 if not np.min(timeDiff) == np.max(timeDiff):
-    print 'Warning: sampling intervals are variable?'
+    print('Warning: sampling intervals are variable?')
 
 # create symlinks
 havemesh = False
@@ -65,10 +71,12 @@ for itime in range(Ntimes):
                 os.path.join(outdir,meshFile)
                 )
         havemesh = True
-    os.symlink(
-            os.path.join(tdirList[itime],solnFile),
-            os.path.join(outdir,newFile.format(itime))
-            )
+    srcfile = os.path.join(tdirList[itime],solnFile)
+    if not os.path.isfile(srcfile):
+        raise IOError('Source file not found: '+srcfile)
+    tgtfile = os.path.join(outdir,newFile.format(itime))
+    print(tgtfile,'-->',srcfile)
+    os.symlink(srcfile,tgtfile)
 
 # create case file for time series
 caseTemplate="""FORMAT
