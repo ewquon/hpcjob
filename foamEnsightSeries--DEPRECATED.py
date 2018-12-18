@@ -3,6 +3,8 @@
 # Create symbolic links for specified directories to form a single Ensight .case
 # file with the complete time series
 #
+# DEPRECATED: tracked version moved to https://github.com/ewquon/pylib/tree/master/bin
+#
 from __future__ import print_function
 import sys
 import os
