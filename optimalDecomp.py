@@ -40,15 +40,17 @@ if __name__ == "__main__":
     Nz = int(sys.argv[3])
     if len(sys.argv) > 4:
         N = int(sys.argv[4])
-        print optimal_decomp(N,Nx,Ny,Nz)
+        print(optimal_decomp(N,Nx,Ny,Nz))
     else:
         ppn = 24
         Ncells = Nx*Ny*Nz
         for cells_per_proc in np.arange(3,10)*1e4:
             Nnodes = int((Ncells / cells_per_proc) / ppn)
             N = Nnodes * ppn
-           #print 'nnodes, ppn =',Nnodes,ppn
-           #print 'nprocs =',N
+           #print('nnodes, ppn =',Nnodes,ppn)
+           #print('nprocs =',N)
            #print 'procs/node =',Ncells/N
-            print N,'Nnodes=',Nnodes,' partions:',optimal_decomp(N,Nx,Ny,Nz),' procs/node =',Ncells/N
+            print(N,'Nnodes=',Nnodes,
+                  ' partions:',optimal_decomp(N,Nx,Ny,Nz),
+                  ' procs/node =',Ncells/N)
 
