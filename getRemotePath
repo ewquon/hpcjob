@@ -1,6 +1,7 @@
 #!/bin/bash
 #baseAddr='equon@peregrine'
-defaultBaseAddr="$USER@peregrine.hpc.nrel.gov"
+#defaultBaseAddr="$USER@peregrine.hpc.nrel.gov"
+defaultBaseAddr="$USER@eagle.hpc.nrel.gov"
 
 if [ -f '.remotePath' ]; then
     curdir=`cat .remotePath`
