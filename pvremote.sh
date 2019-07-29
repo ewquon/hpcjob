@@ -5,7 +5,7 @@ if [ -z "$1" ]; then
     exit
 fi
 
-ip=`ifconfig | grep 'inet ' | grep -v '127.0.0.1' | awk '{print $2}'`
+ip=`ifconfig | grep 'inet ' | grep -v '127.0.0.1' | awk '{print $2}' | tail -n 1`
 echo $ip
 
 ssh $1 "module load paraview && pvserver -rc --client-host=$ip"
