@@ -6,7 +6,9 @@ if [ -z "$1" ]; then
 fi
 
 ip=`ifconfig | grep 'inet ' | grep -v '127.0.0.1' | awk '{print $2}' | tail -n 1`
-echo $ip
+echo "local IP: $ip"
+
+/Applications/ParaView-5.6.0.app/Contents/MacOS/paraview &
 
 ssh $1 "module load paraview && pvserver -rc --client-host=$ip"
 

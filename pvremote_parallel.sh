@@ -21,7 +21,9 @@ echo "srun flags: $slurms"
 echo ''
 
 ip=`ifconfig | grep 'inet ' | grep -v '127.0.0.1' | awk '{print $2}'`
-echo $ip
+echo "local IP: $ip"
+
+/Applications/ParaView-5.6.0.app/Contents/MacOS/paraview &
 
 
 ssh $1 "module load paraview && srun $slurms pvserver -rc --client-host=$ip"
