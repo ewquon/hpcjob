@@ -24,5 +24,6 @@ try:
 except KeyboardInterrupt:
     pass
 else:
-    subprocess.Popen(cmdlist)
+    p = subprocess.Popen(cmdlist)
+    p.wait()
 
