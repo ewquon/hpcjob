@@ -7,7 +7,11 @@ if [ -d "constant" -a -d "system" ]; then
     if [ -f "$1" ]; then
         fname="$1"
     else
-        fname=`ls -rt log.* | tail -n 1`
+        solver=`grep application system/controlDict | awk '{print $2}' | sed 's/\;$//'`
+        fname=`ls -rt log.*$solver* | tail -n 1`
+        if [ -z "$fname" ]; then
+            exit 1
+        fi
         echo "Found OpenFOAM output: $fname" >&2
     fi
 
