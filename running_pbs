@@ -1,0 +1,48 @@
+#!/bin/bash
+#
+# Scrapes PBS qstat output
+#
+
+i=0
+echo "`date`:"
+qstat -u $USER | while read line; do
+    i=$((i+1))
+    #echo $i $line
+    if [ "$i" -gt 5 ]; then
+        id=`echo $line | awk '{print $1}'`
+        stat=`qstat -f $id | grep 'job_state' | awk '{print $NF}'`
+
+        jobtime=`qstat -f $id | grep 'resources_used.walltime' | awk '{print $NF}'`
+        str=`qstat -f $id | grep 'PWD'`
+        n=0
+        while [[ $str != *","* ]]; do
+            n=$((n+1))
+            nextline=`qstat -f $id | grep -A $n 'PWD' | tail -n 1 | sed -e 's/^[[:space:]]*//'`
+            str="$str$nextline"
+        done
+        str=${str##*PWD=}
+        str=${str%%,*}
+        displaypath=${str}
+
+        if [ "$stat" == "R" -o "$stat" == "C" ]; then
+            filestr=`(cd $str && t 2>&1 | grep -e "Star" -e "FOAM")`
+            curtime=`(cd $str && t 2>/dev/null)`
+            if [[ $filestr == *"FOAM"* ]]; then
+                solverstr='OpenFOAM'
+            elif [[ $filestr == *"Star"* ]]; then
+                solverstr='Star'
+            else
+                solverstr='????'
+            fi
+            tstr=`echo $curtime | awk '{printf "t= %f s\n",$NF}'`
+            if [ "$stat" == "R" ]; then
+                echo "Job $id ($displaypath) $solverstr running for $jobtime @ $tstr"
+            elif [ "$stat" == "C" ]; then
+                echo "Job $id ($displaypath) $solverstr finished @ $tstr"
+            fi
+        else
+            echo "Job $id ($displaypath) state: $stat"
+        fi
+    fi
+done
+
