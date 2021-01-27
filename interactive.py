@@ -7,6 +7,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--account',metavar='account',type=str,default='mmc')
 parser.add_argument('--time',metavar='time',type=str,default='30')
 parser.add_argument('--nodes',metavar='nodes',type=int,default=1)
+parser.add_argument('--qos',metavar='qos',type=str,default='normal')
 args = parser.parse_args()
 
 cmdlist = [
@@ -14,6 +15,9 @@ cmdlist = [
     '--time={:s}'.format(args.time),
     '--account={:s}'.format(args.account),
     '--nodes={:d}'.format(args.nodes),
+    '--qos={:s}'.format(args.qos),
+    '--mail-type=BEGIN',
+    '--mail-user=eliot.quon@nrel.gov',
     '--pty', os.environ['SHELL'],
 ] 
 print(' '.join(cmdlist))
