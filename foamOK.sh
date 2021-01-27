@@ -14,7 +14,7 @@ check()
             echo "Current directory does not have $arg"
         else
             logfile="$arg"
-            found=`grep "$donestr" $logfile`
+            found=`grep "^$donestr" $logfile`
             if [ "$?" == 0 ]; then
                 echo -e "${GREEN}$logfile${NC}: $found"
             else
