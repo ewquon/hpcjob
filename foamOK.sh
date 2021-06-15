@@ -30,6 +30,7 @@ check 'End' log.*renumberMesh*
 check 'End' log.*topoSet*
 check 'Refined' log.*refineHexMesh*
 check 'End' log.*refineHexMesh*
+check 'Finalising parallel run' log.*redistributePar*
 check 'Mesh OK' log.*checkMesh*
 check 'End' log.*changeDictionary*
 check 'Max number of cells' log.*decomposePar*
