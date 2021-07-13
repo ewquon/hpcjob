@@ -19,6 +19,22 @@ if [ -d "constant" -a -d "system" ]; then
     latestTime=`echo $str | awk '{print $3}'`
     latestStep=`echo $str | awk '{print $NF}'`
 
+elif [ -d "plt00000" -a -f "datlog" ]; then
+    #
+    # Solvers based on AMReX
+    #
+    if [ -f "$1" ]; then
+        fname="$1"
+    else
+        fname=`ls -rt *log* | grep -v 'datlog' | tail -n 1`
+        echo "Found AMReX output: $fname" >&2
+    fi
+
+    # STEP = 40022 TIME = 0.20011 DT = 5e-06
+    str=`grep '^STEP =' $fname | tail -n 1`
+    latestTime=`echo $str | awk '{print $6}'`
+    latestStep=`echo $str | awk '{print $3}'`
+
 #elif [ -f "${starsim[0]}" ]; then
 elif ls *.sim &> /dev/null; then
     #
