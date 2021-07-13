@@ -15,7 +15,7 @@ if [ -d "constant" -a -d "system" ]; then
         echo "Found OpenFOAM output: $fname" >&2
     fi
 
-    str=`grep 'Time =' $fname | grep -v 'Exec' | tail -n 1`
+    str=`grep '^Time =' $fname | tail -n 1`
     latestTime=`echo $str | awk '{print $3}'`
     latestStep=`echo $str | awk '{print $NF}'`
 
