@@ -35,6 +35,16 @@ elif [ -d "plt00000" -a -f "datlog" ]; then
     latestTime=`echo $str | awk '{print $6}'`
     latestStep=`echo $str | awk '{print $3}'`
 
+elif [ -f "rsl.out.0000" -a "rsl.error.0000" ]; then
+    fname='rsl.out.0000'
+    echo "Found WRF output: $fname" >&2
+    # Timing for main: time 2020-05-15_12:00:06 on domain   2:    2.89353 elapsed seconds
+    ndom=`grep 'Domain #' $fname | wc -l`
+    domstr=`printf '%3g' $ndom`
+    str=`grep '^Timing for main' $fname | tail -n 10 | grep "on domain $domstr" | tail -n 1`
+    latestTime=`echo $str | awk '{print $5}'`
+    latestStep='--'
+
 #elif [ -f "${starsim[0]}" ]; then
 elif ls *.sim &> /dev/null; then
     #
