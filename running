@@ -7,12 +7,19 @@ while read -r line; do
     workdir=${workdir#*=}
     cd $workdir
     if [ -d 'constant' -a -d 'system' ]; then
-        echo "SOWFA $jobid $workdir"
-        t
+        echo ''
+        echo "SOWFA jobid=$jobid in $workdir"
+        echo '-----'
+    elif [ -d 'plt00000' -a -f 'datlog' ]; then
+        echo ''
+        echo "AMReX jobid=$jobid in $workdir"
+        echo '-----'
     elif [ -f 'wrf.exe' ]; then
-        echo "WRF $jobid $workdir"
-        tail -n 100 rsl.out.0000 | grep '^Timing' | tail -n 1
+        echo ''
+        echo "WRF jobid=$jobid in $workdir"
+        echo '---'
     else
         echo "Unknown simulation $jobid $workdir"
     fi
+    t
 done
