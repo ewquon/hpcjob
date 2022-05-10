@@ -12,8 +12,9 @@ parser.add_argument('--mail',dest='mail',default=True,action='store_true')
 parser.add_argument('--no-mail',dest='mail', action='store_false')
 args = parser.parse_args()
 
+# https://www.nrel.gov/hpc/announcements/posts/feb-2022-slurm-changes.html
 cmdlist = [
-    'srun',
+    'salloc',#'srun',
     '--time={:s}'.format(args.time),
     '--account={:s}'.format(args.account),
     '--ntasks={:d}'.format(args.ntasks),
@@ -24,7 +25,7 @@ if args.mail:
         '--mail-type=BEGIN',
         '--mail-user=eliot.quon@nrel.gov',
     ]
-cmdlist += ['--pty', os.environ['SHELL']]
+#cmdlist += ['--pty', os.environ['SHELL']]
 print(' '.join(cmdlist))
 
 prompt = raw_input if (sys.version_info[0] < 3) else input
