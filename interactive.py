@@ -4,12 +4,12 @@ import argparse
 import subprocess
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--account',metavar='account',type=str,default='mmc')
+parser.add_argument('--account',metavar='account',type=str,default='erf')
 parser.add_argument('--time',metavar='time',type=str,default='30')
 parser.add_argument('--ntasks',metavar='ntasks',type=int,default=36)
 parser.add_argument('--qos',metavar='qos',type=str,default='normal')
-parser.add_argument('--mail',dest='mail',default=True,action='store_true')
-parser.add_argument('--no-mail',dest='mail', action='store_false')
+parser.add_argument('--mail',dest='mail',default=False,action='store_true')
+#parser.add_argument('--no-mail',dest='mail', action='store_false')
 args = parser.parse_args()
 
 # https://www.nrel.gov/hpc/announcements/posts/feb-2022-slurm-changes.html
