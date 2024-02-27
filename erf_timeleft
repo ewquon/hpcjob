@@ -1,0 +1,63 @@
+#!/bin/bash
+inpfile=''
+dt=-1
+startstep=0
+maxstep=-1
+latest=-1
+walltime=-1
+
+logfile='log'
+if [ -n "$1" ]; then
+    logfile="$1"
+fi
+
+for pltfile in plt*; do
+    if [[ $pltfile != *.old.* ]]; then
+        if [ -d "$pltfile" ]; then
+            #echo -e "\e[1A\e[KChecking $pltfile"
+            jobinfo="$pltfile/job_info"
+            if [ -z "$inpfile" ]; then
+                inpfile=`grep -m 1 '^inputs file:' $jobinfo | awk '{print $NF}'`
+                chkpt=`grep '^erf.restart' $inpfile | awk '{print $3}'`
+                if [ -n "$chkpt" ]; then
+                    startstep=${chkpt#chk}
+                    echo "Restarting from step $startstep"
+                fi
+                stoptime=`grep '^stop_time' $inpfile | tail -n 1 | awk '{print $3}' | sed 's/e/*10^/'`
+                dt=`grep '^erf.fixed_dt' $inpfile | tail -n 1 | awk '{print $3}' | sed 's/e/*10^/'`
+                if [ -z "$dt" ]; then
+                    # dt is not fixed, scrape latest from log
+                    dt=`tail -n 500 $logfile | grep 'dt = ' | tail -n 1 | awk '{print $NF}'`
+                fi
+                maxstep=`bc <<< "$stoptime / $dt"`
+                #echo $inpfile $stoptime $dt $maxstep
+            fi
+            ncpu=`grep -m 1 '^number of MPI' $jobinfo | awk '{print $NF}'`
+            cpuhrs=`grep -m 1 '^CPU time' $jobinfo | awk '{print $NF}'`
+            this_walltime=`bc <<< "scale=4; $cpuhrs / ${ncpu}"`
+            this_step=${pltfile#plt}
+            #echo $this_step $ncpu $cpuhrs $this_walltime
+            if [ "$this_step" -gt "$latest" ]; then
+                latest="$this_step"
+                walltime="$this_walltime"
+            fi
+        fi
+    fi
+done
+if [ "$latest" == -1 ]; then
+    echo 'No pltfiles found?'
+elif [ "$latest" == "$maxstep" ]; then
+    echo 'Simulation should be complete'
+else
+    echo "Most recent output is step $latest after $walltime h"
+    walltime_per_step=`bc <<< "scale=8; $walltime*3600 / ($latest-$startstep)"`
+    echo "Approx $walltime_per_step s / step"
+    curstep=`tail -n 500 $logfile | grep '^Coarse STEP' | tail -n 1 | awk '{print $3}'`
+    curtime=`bc <<< "scale=4; $curstep * $dt"`
+    echo "Currently at t = $curtime s"
+    pct=`bc <<< "scale=1; 100*$curstep/$maxstep"`
+    echo "Step $curstep/$maxstep ($pct% complete)"
+    stepsleft=`bc <<< "$maxstep - $curstep"`
+    timeleft=`bc <<< "scale=4; $stepsleft*$walltime_per_step/3600"`
+    echo "Estimated $timeleft h remaining"
+fi

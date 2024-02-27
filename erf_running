@@ -1,0 +1,17 @@
+#!/bin/bash
+squeue -u equon -o '%12i %20j %.6D %.2t %.10S %.10M %.9P %.10r %.10p' |
+tail -n +2 |
+awk '{print $1}' |
+while read jobid; do
+    echo ''
+    scontrol show jobid -dd $jobid |
+    while read line; do
+        if [[ $line == JobId=* ]]; then
+            echo $line
+        elif [[ $line == WorkDir=* ]]; then
+            workdir=${line##*WorkDir=}
+            echo $workdir
+            tail -n 100 $workdir/log | grep -e '. TIME =' -e '^smallest even' | tail -n 2
+        fi
+    done
+done
