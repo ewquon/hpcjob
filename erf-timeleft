@@ -50,16 +50,17 @@ else
     echo "Most recent output is step $latest after $walltime h"
     walltime_per_step=`bc <<< "scale=8; $walltime*3600 / ($latest-$startstep)"`
     echo "Approx $walltime_per_step s / step"
-    echo "Currently at t = $curtime s"
     if [ "$latest" == "$maxstep" ]; then
         echo 'Simulation should be complete'
+        echo "Total walltime $walltime h on $ncpu cores"
     else
         curstep=`tail -n 500 $logfile | grep '^Coarse STEP' | tail -n 1 | awk '{print $3}'`
         curtime=`bc <<< "scale=4; $curstep * $dt"`
         pct=`bc <<< "scale=1; 100*$curstep/$maxstep"`
-        echo "Step $curstep/$maxstep ($pct% complete)"
         stepsleft=`bc <<< "$maxstep - $curstep"`
         timeleft=`bc <<< "scale=4; $stepsleft*$walltime_per_step/3600"`
-        echo "Estimated $timeleft h remaining"
+        echo "Currently at t = $curtime s"
+        echo "Step $curstep/$maxstep ($pct% complete)"
+        echo "Running for $walltime h -- estimated $timeleft h remaining"
     fi
 fi
