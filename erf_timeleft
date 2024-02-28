@@ -46,18 +46,20 @@ for pltfile in plt*; do
 done
 if [ "$latest" == -1 ]; then
     echo 'No pltfiles found?'
-elif [ "$latest" == "$maxstep" ]; then
-    echo 'Simulation should be complete'
 else
     echo "Most recent output is step $latest after $walltime h"
     walltime_per_step=`bc <<< "scale=8; $walltime*3600 / ($latest-$startstep)"`
     echo "Approx $walltime_per_step s / step"
-    curstep=`tail -n 500 $logfile | grep '^Coarse STEP' | tail -n 1 | awk '{print $3}'`
-    curtime=`bc <<< "scale=4; $curstep * $dt"`
     echo "Currently at t = $curtime s"
-    pct=`bc <<< "scale=1; 100*$curstep/$maxstep"`
-    echo "Step $curstep/$maxstep ($pct% complete)"
-    stepsleft=`bc <<< "$maxstep - $curstep"`
-    timeleft=`bc <<< "scale=4; $stepsleft*$walltime_per_step/3600"`
-    echo "Estimated $timeleft h remaining"
+    if [ "$latest" == "$maxstep" ]; then
+        echo 'Simulation should be complete'
+    else
+        curstep=`tail -n 500 $logfile | grep '^Coarse STEP' | tail -n 1 | awk '{print $3}'`
+        curtime=`bc <<< "scale=4; $curstep * $dt"`
+        pct=`bc <<< "scale=1; 100*$curstep/$maxstep"`
+        echo "Step $curstep/$maxstep ($pct% complete)"
+        stepsleft=`bc <<< "$maxstep - $curstep"`
+        timeleft=`bc <<< "scale=4; $stepsleft*$walltime_per_step/3600"`
+        echo "Estimated $timeleft h remaining"
+    fi
 fi
