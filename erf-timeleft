@@ -3,7 +3,6 @@ inpfile=''
 dt=-1
 startstep=0
 maxstep=-1
-latest=-1
 walltime=-1
 
 logfile='log'
@@ -11,67 +10,56 @@ if [ -n "$1" ]; then
     logfile="$1"
 fi
 
-for pltfile in plt*; do
-    if [[ $pltfile != *.old.* ]]; then
-        if [ -d "$pltfile" ]; then
-            #echo -e "\e[1A\e[KChecking $pltfile"
-            jobinfo="$pltfile/job_info"
-            if [ -z "$inpfile" ]; then
-                inpfile=`grep -m 1 '^inputs file:' $jobinfo | awk '{print $NF}'`
-                chkpts=`grep '^erf.restart' $inpfile | awk '{print $3}'`
-                if [ -n "$chkpts" ]; then
-                    echo -n 'Found checkpoint(s):'
-                    for chkpt in $chkpts; do
-                        echo -n " $chkpt"
-                        chkstep="${chkpt#chk}"
-                        if [ "$chkstep" -gt "$startstep" ]; then
-                            startstep=$chkstep
-                            starttime="`tail -n +9 $chkpt/Header | head -n 1`"
-                        fi
-                    done
-                    echo ''
-                fi
-                if [ "$startstep" -gt 0 ]; then
-                    echo "Latest restart from t = ${starttime}s (step $startstep)"
-                fi
-                stoptime=`grep '^stop_time' $inpfile | tail -n 1 | awk '{print $3}' | sed 's/e/*10^/'`
-                dt=`grep '^erf.fixed_dt' $inpfile | tail -n 1 | awk '{print $3}' | sed 's/e/*10^/'`
-                if [ -z "$dt" ]; then
-                    # dt is not fixed, scrape latest from log
-                    dt=`tail -n 500 $logfile | grep 'dt = ' | tail -n 1 | awk '{print $NF}'`
-                    echo "Latest dt ~= $dt s"
-                fi
-                maxstep=`bc <<< "$stoptime / $dt"`
-                #echo "$inpfile $stoptime $dt $maxstep"
+pltfile=`ls -drt plt* | tail -n 1`
+if [[ $pltfile == *.old.* ]]; then
+    echo "The latest pltfile is old? $pltfile"
+fi
+latest=${pltfile#plt}
+jobinfo="$pltfile/job_info"
+if [ -z "$inpfile" ]; then
+    inpfile=`grep -m 1 '^inputs file:' $jobinfo | awk '{print $NF}'`
+    chkpts=`grep '^erf.restart' $inpfile | awk '{print $3}'`
+    if [ -n "$chkpts" ]; then
+        echo -n 'Found checkpoint(s):'
+        for chkpt in $chkpts; do
+            echo -n " $chkpt"
+            chkstep="${chkpt#chk}"
+            if [ "$chkstep" -gt "$startstep" ]; then
+                startstep=$chkstep
+                starttime="`tail -n +9 $chkpt/Header | head -n 1`"
             fi
-            ncpu=`grep -m 1 '^number of MPI' $jobinfo | awk '{print $NF}'`
-            cpuhrs=`grep -m 1 '^CPU time' $jobinfo | awk '{print $NF}'`
-            this_walltime=`bc <<< "scale=4; $cpuhrs / ${ncpu}"`
-            this_step=${pltfile#plt}
-            #echo $this_step $ncpu $cpuhrs $this_walltime
-            if [ "$this_step" -gt "$latest" ]; then
-                latest="$this_step"
-                walltime="$this_walltime"
-            fi
-        fi
+        done
+        echo ''
     fi
-done
-if [ "$latest" == -1 ]; then
-    echo 'No pltfiles found?'
+    if [ "$startstep" -gt 0 ]; then
+        echo "Latest restart from t = ${starttime}s (step $startstep)"
+    fi
+    stoptime=`grep '^stop_time' $inpfile | tail -n 1 | awk '{print $3}' | sed 's/e/*10^/'`
+    dt=`grep '^erf.fixed_dt' $inpfile | tail -n 1 | awk '{print $3}' | sed 's/e/*10^/'`
+    if [ -z "$dt" ]; then
+        # dt is not fixed, scrape latest from log
+        dt=`tail -n 500 $logfile | grep 'dt = ' | tail -n 1 | awk '{print $NF}'`
+        echo "Latest dt ~= $dt s"
+    fi
+    maxstep=`bc <<< "$stoptime / $dt"`
+    #echo "$inpfile $stoptime $dt $maxstep"
+fi
+ncpu=`grep -m 1 '^number of MPI' $jobinfo | awk '{print $NF}'`
+cpuhrs=`grep -m 1 '^CPU time' $jobinfo | awk '{print $NF}'`
+walltime=`bc <<< "scale=4; $cpuhrs / ${ncpu}"`
+
+echo "Most recent output is step $latest after running for $walltime h"
+walltime_per_step=`bc <<< "scale=8; $walltime*3600 / ($latest-$startstep)"`
+echo "Computational cost is $walltime_per_step s / step"
+if [ "$latest" == "$maxstep" ]; then
+    echo 'Simulation should be complete'
+    echo "Total walltime $walltime h on $ncpu cores"
 else
-    echo "Most recent output is step $latest after running for $walltime h"
-    walltime_per_step=`bc <<< "scale=8; $walltime*3600 / ($latest-$startstep)"`
-    echo "Computational cost is $walltime_per_step s / step"
-    if [ "$latest" == "$maxstep" ]; then
-        echo 'Simulation should be complete'
-        echo "Total walltime $walltime h on $ncpu cores"
-    else
-        curstep=`tail -n 500 $logfile | grep '^Coarse STEP' | tail -n 1 | awk '{print $3}'`
-        curtime=`bc <<< "scale=4; $curstep * $dt"`
-        pct=`bc <<< "scale=1; 100*$curstep/$maxstep"`
-        stepsleft=`bc <<< "$maxstep - $curstep"`
-        timeleft=`bc <<< "scale=4; $stepsleft*$walltime_per_step/3600"`
-        echo "Currently on step $curstep/$maxstep at t = $curtime s (stop time: $stoptime s) -- simulation is $pct% complete"
-        echo "Estimated walltime remaining: $timeleft h"
-    fi
+    curstep=`tail -n 500 $logfile | grep '^Coarse STEP' | tail -n 1 | awk '{print $3}'`
+    curtime=`bc <<< "scale=4; $curstep * $dt"`
+    pct=`bc <<< "scale=1; 100*$curstep/$maxstep"`
+    stepsleft=`bc <<< "$maxstep - $curstep"`
+    timeleft=`bc <<< "scale=4; $stepsleft*$walltime_per_step/3600"`
+    echo "Currently on step $curstep/$maxstep at t = $curtime s (stop time: $stoptime s) -- simulation is $pct% complete"
+    echo "Estimated walltime remaining: $timeleft h"
 fi
