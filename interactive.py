@@ -6,11 +6,13 @@ import subprocess
 parser = argparse.ArgumentParser()
 parser.add_argument('--account',metavar='account',type=str,default='erf')
 parser.add_argument('--time',metavar='time',type=str,default='30')
-parser.add_argument('--ntasks',metavar='ntasks',type=int,default=36)
+parser.add_argument('--ntasks',metavar='ntasks',type=int,default=96)
 parser.add_argument('--qos',metavar='qos',type=str,default='normal')
 parser.add_argument('--mail',dest='mail',default=False,action='store_true')
 #parser.add_argument('--no-mail',dest='mail', action='store_false')
-args = parser.parse_args()
+
+#args = parser.parse_args()
+args, extraargs = parser.parse_known_args()
 
 # https://www.nrel.gov/hpc/announcements/posts/feb-2022-slurm-changes.html
 cmdlist = [
@@ -26,6 +28,10 @@ if args.mail:
         '--mail-user=eliot.quon@nrel.gov',
     ]
 #cmdlist += ['--pty', os.environ['SHELL']]
+if len(extraargs) > 0:
+    print('Extra args found')
+    cmdlist += extraargs
+
 print(' '.join(cmdlist))
 
 prompt = raw_input if (sys.version_info[0] < 3) else input
